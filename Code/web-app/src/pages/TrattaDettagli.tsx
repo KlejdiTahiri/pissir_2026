@@ -48,6 +48,7 @@ function TrattaDettagli() {
     const [velocitaMessaggio, setVelocitaMessaggio] = useState("");
 
     const [showModaleInfrazioni, setShowModaleInfrazioni] = useState(false);
+    const [totaleGuadagni, setTotaleGuadagni] = useState<number>(0);
 
     // ── FETCH TRATTA ──
     const fetchTrattaDettagli = async () => {
@@ -74,25 +75,32 @@ function TrattaDettagli() {
     // Se il backend non ha ancora questa route, aggiungila lato Java oppure
     // chiama per singola targa con GET /infrazione/velocita/:targa.
     const fetchInfrazioni = async (currentTratta: Tratta) => {
-        setInfrazioniLoading(true);
-        try {
-            const res = await fetch(`/infrazione/velocita/tratta/${currentTratta.id}`);
-            if (res.ok) {
-                const data: InfrazioneVelocita[] = await res.json();
-                setInfrazioni(Array.isArray(data) ? data : []);
-            } else if (res.status === 404) {
-                setInfrazioni([]);
-            } else {
-                console.warn("Risposta inattesa infrazioni:", res.status);
-                setInfrazioni([]);
-            }
-        } catch (err) {
-            console.error("Errore fetch infrazioni:", err);
+    setInfrazioniLoading(true);
+    try {
+        const q = new URLSearchParams({
+            cap: currentTratta.capIn,
+            idCasello: String(currentTratta.idCaselloIn),
+            direzione: currentTratta.dirIn,
+        });
+
+        const res = await fetch(`/api/infrazione/velocita/casello?${q.toString()}`);
+
+        if (res.ok) {
+            const data: InfrazioneVelocita[] = await res.json();
+            setInfrazioni(Array.isArray(data) ? data : []);
+        } else if (res.status === 404) {
             setInfrazioni([]);
-        } finally {
-            setInfrazioniLoading(false);
+        } else {
+            console.warn("Risposta inattesa infrazioni:", res.status);
+            setInfrazioni([]);
         }
-    };
+    } catch (err) {
+        console.error("Errore fetch infrazioni:", err);
+        setInfrazioni([]);
+    } finally {
+        setInfrazioniLoading(false);
+    }
+};
 
     // ── FETCH TRAFFICO ──
     const fetchTrafficData = async () => {
@@ -144,6 +152,38 @@ function TrattaDettagli() {
         }
     };
 
+    const fetchTotaleGuadagni = async (currentTratta: Tratta) => {
+    try {
+        const q = new URLSearchParams({
+            capIn: currentTratta.capIn,
+            idCaselloIn: String(currentTratta.idCaselloIn),
+            dirIn: currentTratta.dirIn,
+            capOut: currentTratta.capOut,
+            idCaselloOut: String(currentTratta.idCaselloOut),
+            dirOut: currentTratta.dirOut,
+        });
+
+        const res = await fetch(`/api/storico_passaggi/guadagni?${q.toString()}`);
+
+        if (!res.ok) {
+            console.warn("Risposta inattesa guadagni:", res.status);
+            return;
+        }
+
+        const data = await res.json();
+        const valore = typeof data?.totaleGuadagni === "number" ? data.totaleGuadagni : 0;
+        setTotaleGuadagni(valore);
+
+        // Se vuoi anche sincronizzarlo dentro traffico:
+        setTraffico(prev => prev ? { ...prev, totaleGuadagni: Math.round(valore) } : prev);
+
+    } catch (err) {
+        console.error("Errore fetch totale guadagni:", err);
+    }
+};
+
+
+
     useEffect(() => {
         fetchTrattaDettagli();
         fetchTrafficData();
@@ -151,17 +191,23 @@ function TrattaDettagli() {
 
     // Dopo aver caricato la tratta, carica le infrazioni
     useEffect(() => {
-        if (tratta) fetchInfrazioni(tratta);
-    }, [tratta]);
+    if (tratta) {
+        fetchInfrazioni(tratta);
+        fetchTotaleGuadagni(tratta);
+    }
+}, [tratta]);
 
     // Auto-refresh ogni 30s
     useEffect(() => {
-        const interval = setInterval(() => {
-            fetchTrafficData();
-            if (tratta) fetchInfrazioni(tratta);
-        }, 30000);
-        return () => clearInterval(interval);
-    }, [id, tratta]);
+    const interval = setInterval(() => {
+        fetchTrafficData();
+        if (tratta) {
+            fetchInfrazioni(tratta);
+            fetchTotaleGuadagni(tratta);
+        }
+    }, 30000);
+    return () => clearInterval(interval);
+}, [id, tratta]);
 
     const handleBack = () => navigate(-1);
     const handleProfileClick = () => navigate("/profilo");
@@ -382,7 +428,8 @@ function TrattaDettagli() {
 
                             <div className="detail-card">
                                 <h4>Totale guadagni</h4>
-                                <p className="big-number">{traffico.totaleGuadagni} €</p>
+                                <p className="big-number">€{totaleGuadagni.toFixed(2)} €</p>
+
                                 <p className="detail-subtitle">Ultimo mese</p>
                             </div>
 
@@ -528,37 +575,44 @@ function TrattaDettagli() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {infrazioni.map((inf) => {
-                                            const eccesso = inf.velocitaRilevata - inf.velocitaMassima;
-                                            const label = getEccessoLabel(inf.velocitaRilevata, inf.velocitaMassima);
-                                            const color = getEccessoColor(inf.velocitaRilevata, inf.velocitaMassima);
-                                            return (
-                                                <tr key={inf.id}>
-                                                    <td className="targa-cell">{inf.targa}</td>
-                                                    <td>{inf.kmRilevazione} km</td>
-                                                    <td style={{ color: '#ef4444', fontWeight: 600 }}>
-                                                        {inf.velocitaRilevata} km/h
-                                                    </td>
-                                                    <td>{inf.velocitaMassima} km/h</td>
-                                                    <td style={{ color: '#ef4444', fontWeight: 600 }}>
-                                                        +{eccesso} km/h
-                                                    </td>
-                                                    <td>
-                                                        <span
-                                                            className="gravita-badge"
-                                                            style={{ backgroundColor: color }}
-                                                        >
-                                                            {label}
-                                                        </span>
-                                                    </td>
-                                                    <td className="multa-cell">€{inf.importo.toFixed(2)}</td>
-                                                    <td className="timestamp-cell">
-                                                        {new Date(inf.timestamp).toLocaleString('it-IT')}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
+  {infrazioni.map((inf) => {
+    const eccesso = inf.velocitaRilevata - inf.velocitaMassima;
+    const label = getEccessoLabel(inf.velocitaRilevata, inf.velocitaMassima);
+    const color = getEccessoColor(inf.velocitaRilevata, inf.velocitaMassima);
+
+    return (
+      <tr key={inf.id}>
+        <td className="targa-cell">{inf.targa}</td>
+        <td>{inf.kmRilevazione} km</td>
+
+        <td className="speed-cell">
+          {inf.velocitaRilevata} km/h
+        </td>
+
+        <td>{inf.velocitaMassima} km/h</td>
+
+        <td className="excess-cell">
+          +{eccesso} km/h
+        </td>
+
+        <td>
+          <span
+            className="gravita-badge"
+            style={{ backgroundColor: color }}
+          >
+            {label}
+          </span>
+        </td>
+
+        <td className="multa-cell">€{inf.importo.toFixed(2)}</td>
+
+        <td className="timestamp-cell">
+          {new Date(inf.timestamp).toLocaleString("it-IT")}
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
                                 </table>
                             </div>
                         )}

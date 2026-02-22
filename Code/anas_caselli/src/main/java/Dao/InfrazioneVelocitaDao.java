@@ -74,23 +74,31 @@ public class InfrazioneVelocitaDao {
         return null;
     }
 
-    // ── Tutte le infrazioni di una tratta (usato dal frontend) ──
-    public static List<JsonObject> tuttePerTratta(int idTratta) {
-        String sql = "SELECT * FROM infrazioni_velocita WHERE id_tratta = ? ORDER BY id DESC";
+    // ── Tutte le infrazioni per casello (cap + id_casello + direzione) ──
+    public static List<JsonObject> tuttePerCasello(String cap, int idCasello, String direzione) {
+        String sql = "SELECT * FROM infrazioni_velocita " +
+                "WHERE UPPER(TRIM(cap)) = UPPER(TRIM(?)) " +
+                "AND id_casello = ? " +
+                "AND UPPER(TRIM(direzione)) = UPPER(TRIM(?)) " +
+                "ORDER BY id DESC";
         List<JsonObject> lista = new ArrayList<>();
 
         try (Connection conn = Database.connect();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, idTratta);
+            ps.setString(1, cap);
+            ps.setInt(2, idCasello);
+            ps.setString(3, direzione);
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     lista.add(mapRow(rs));
                 }
             }
         } catch (Exception e) {
-            System.out.println("❌ Errore lettura infrazioni per tratta: " + e.getMessage());
+            System.out.println("❌ Errore lettura infrazioni per casello: " + e.getMessage());
         }
+        System.out.printf("[DEBUG][DAO] Query infrazioni: cap='%s' id=%d dir='%s'%n", cap, idCasello, direzione);
         return lista;
     }
 }

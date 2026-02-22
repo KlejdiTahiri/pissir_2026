@@ -2,6 +2,9 @@ package org.example.routes;
 
 import Dao.PagamentoDao;
 import com.google.gson.Gson;
+import org.example.utils.RispostaErrore;
+
+import java.util.List;
 
 import static spark.Spark.*;
 
@@ -99,7 +102,56 @@ public class PagamentoRoutes {
             }
             return gson.toJson(PagamentoDao.getPagamentiRecenti(limit));
         });
+
+
+        // Aggiunge alla classe che registra le route (es. BigliettoRoutes.java o simile)
+
+// GET /biglietti_pagati
+// Parametri query: capOut, idCaselloOut, dirOut
+// Restituisce la lista dei pagamenti del casello di uscita specificato
+        get("/biglietti_pagati", (req, res) -> {
+            res.type("application/json");
+            System.out.println("[DEBUG] Richiesta GET /biglietti_pagati ricevuta");
+
+            String capOut        = req.queryParams("capOut");
+            String idCaselloStr  = req.queryParams("idCaselloOut");
+            String dirOut        = req.queryParams("dirOut");
+
+            // ── Validazione parametri obbligatori ──
+            if (capOut == null || capOut.isBlank()) {
+                res.status(400);
+                return gson.toJson(new RispostaErrore("Parametro 'capOut' mancante"));
+            }
+            if (dirOut == null || dirOut.isBlank()) {
+                res.status(400);
+                return gson.toJson(new RispostaErrore("Parametro 'dirOut' mancante"));
+            }
+
+            int idCaselloOut;
+            try {
+                idCaselloOut = Integer.parseInt(idCaselloStr);
+            } catch (NumberFormatException e) {
+                System.err.println("[ERROR] Parametro 'idCaselloOut' non valido: " + idCaselloStr);
+                res.status(400);
+                return gson.toJson(new RispostaErrore("Parametro 'idCaselloOut' non valido"));
+            }
+
+            System.out.printf("[DEBUG] Fetch pagamenti → capOut=%s | idCaselloOut=%d | dirOut=%s%n",
+                    capOut, idCaselloOut, dirOut);
+
+            // ── Query al DAO ──
+            List<PagamentoDao.PagamentoRecord> pagamenti =
+                    PagamentoDao.getPagamentiPerUscita(capOut, idCaselloOut, dirOut);
+
+            System.out.println("[DEBUG] Pagamenti trovati: " + pagamenti.size());
+
+            res.status(200);
+            return gson.toJson(pagamenti);
+        });
     }
+
+
+
 
     private static Object err(String msg) {
         return new ApiResponse(false, msg, null);

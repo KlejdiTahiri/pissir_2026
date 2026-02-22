@@ -1,9 +1,6 @@
 package MQTT.client;
 
-import MQTT.messages.AutomobileMsg;
-import MQTT.messages.IncidenteMsg;
-import MQTT.messages.InfrazioneVelocitaMsg;
-import MQTT.messages.PagamentoMsg;
+import MQTT.messages.*;
 import com.google.gson.JsonObject;
 import org.springframework.http.*;
 import org.springframework.web.client.*;
@@ -52,6 +49,55 @@ public class MqttMessageHandler implements MessageHandler {
         }
 
         handleIncidente(msg);
+    }
+
+
+    public void handleStoricoPassaggio(String topic, StoricoPassaggioMsg msg) {
+        if (msg == null || !msg.isValid()) {
+            System.out.println("⚠️ StoricoPassaggioMsg nullo o non valido.");
+            return;
+        }
+
+        System.out.printf(
+                "📚 [STORICO] idBiglietto=%d targa=%s %s/%d/%s -> %s/%d/%s km=%d v=%.1f metodo=%s prezzo=%.2f telepass=%d%n",
+                msg.getIdBiglietto(),
+                msg.getTarga(),
+                msg.getCapIn(), msg.getIdCaselloIn(), msg.getDirezioneIn(),
+                msg.getCapOut(), msg.getIdCaselloOut(), msg.getDirezioneOut(),
+                msg.getChilometri(),
+                msg.getVelocitaMedia(),
+                msg.getMetodoPagamento(),
+                msg.getPrezzoPagato(),
+                msg.getTelepass()
+        );
+
+        String url = String.format(
+                "%s/storico_passaggio?targa=%s" +
+                        "&capIn=%s&idCaselloIn=%d&dirIn=%s" +
+                        "&capOut=%s&idCaselloOut=%d&dirOut=%s" +
+                        "&dataIngresso=%s&dataUscita=%s" +
+                        "&chilometri=%d&velocitaMedia=%s" +
+                        "&telepass=%d&prezzoPagato=%s&metodoPagamento=%s",
+                BASE_URL,
+                enc(msg.getTarga()),
+                enc(msg.getCapIn()),
+                msg.getIdCaselloIn(),
+                enc(msg.getDirezioneIn()),
+                enc(msg.getCapOut()),
+                msg.getIdCaselloOut(),
+                enc(msg.getDirezioneOut()),
+                enc(msg.getDataIngresso()),
+                enc(msg.getDataUscita()),
+                msg.getChilometri(),
+                // velocità con punto decimale garantito
+                String.format(Locale.ROOT, "%.2f", msg.getVelocitaMedia()),
+                msg.getTelepass(),
+                money(msg.getPrezzoPagato()),
+                enc(msg.getMetodoPagamento())
+        );
+
+        boolean ok = executeWithRetry("POST", url, "storico passaggio", msg.getTarga());
+        logResult(ok, "StoricoPassaggio", msg.getTarga());
     }
 
     private void handleIncidente(IncidenteMsg msg) {

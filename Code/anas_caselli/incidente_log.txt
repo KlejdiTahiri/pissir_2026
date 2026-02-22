@@ -13,3 +13,6 @@
 {"idBiglietto":23,"targa":"RH602SX","cap":"FI","idCasello":1,"direzione":"INGRESSO","timestamp":"2025-11-22T13:50:17.659839391","incidente":true,"descrizione":"Tamponamento a catena","gravita":"GRAVE","idTratta":48}
 {"idBiglietto":27,"targa":"TN765KQ","cap":"BA","idCasello":2,"direzione":"INGRESSO","timestamp":"2025-11-22T11:20:17.660250035","incidente":true,"descrizione":"Veicolo in fiamme","gravita":"MEDIA","idTratta":44}
 {"idBiglietto":46,"targa":"RA181NE","cap":"FI","idCasello":2,"direzione":"INGRESSO","timestamp":"2025-11-22T06:23:17.662240935","incidente":true,"descrizione":"Veicolo in fiamme","gravita":"MEDIA","idTratta":22}
+{"idBiglietto":26,"targa":"KW608BJ","cap":"TO","idCasello":1,"direzione":"INGRESSO","timestamp":"2025-11-22T16:09:17.660157075","incidente":true,"descrizione":"Veicolo in fiamme","gravita":"GRAVE","idTratta":32}
+{"idBiglietto":25,"targa":"TP348PR","cap":"MI","idCasello":1,"direzione":"INGRESSO","timestamp":"2025-11-22T10:17:17.660067582","incidente":true,"descrizione":"Tamponamento a catena","gravita":"MEDIA","idTratta":47}
+{"idBiglietto":31,"targa":"VC118GI","cap":"FI","idCasello":2,"direzione":"INGRESSO","timestamp":"2025-11-22T05:13:17.660631042","incidente":true,"descrizione":"Ribaltamento autocarro","gravita":"GRAVE","idTratta":9}

@@ -28,18 +28,20 @@ public class MQTTClient {
 
             client.subscribe("casello/ingresso", 0);
             client.subscribe("casello/uscita/+", 0);
-            client.subscribe("casello/guasto/#", 0); // ✅ Pattern corretto per catturare tutti i guasti
+            client.subscribe("casello/guasto/#", 0);
             client.subscribe("tratta/incidente", 0);
             client.subscribe("casello/pagamento/#", 0);
             client.subscribe("tratta/infrazione/velocita", 0);
+            client.subscribe("casello/storico_passaggio/#", 0);
 
             System.out.println("✅ MQTT Client connesso e iscritto ai topic:");
             System.out.println("   - casello/ingresso");
             System.out.println("   - casello/uscita/+");
             System.out.println("   - casello/guasto/#");
             System.out.println("   - tratta/incidente");
-            System.out.println("   - tratta/pagamento/#");
+            System.out.println("   - casello/pagamento/#");
             System.out.println("   - tratta/infrazione/velocita");
+            System.out.println("   - casello/storico_passaggio/#");
 
         } catch (MqttException e) {
             throw new RuntimeException(e);

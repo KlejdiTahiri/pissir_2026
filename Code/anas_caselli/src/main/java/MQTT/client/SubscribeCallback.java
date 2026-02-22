@@ -1,10 +1,7 @@
 package MQTT.client;
 
-import MQTT.messages.IncidenteMsg;
-import MQTT.messages.InfrazioneVelocitaMsg;
-import MQTT.messages.PagamentoMsg;
+import MQTT.messages.*;
 import com.google.gson.Gson;
-import MQTT.messages.AutomobileMsg;
 import org.eclipse.paho.client.mqttv3.*;
 
 public class SubscribeCallback implements MqttCallback {
@@ -37,7 +34,10 @@ public class SubscribeCallback implements MqttCallback {
             } else if (topic.equals("tratta/infrazione/velocita")) {
                 InfrazioneVelocitaMsg vmsg = gson.fromJson(payload, InfrazioneVelocitaMsg.class);
                 handler.handleInfrazioneVelocita(topic, vmsg);
-            }    else {
+            }   else if (topic.startsWith("casello/storico_passaggio/")) {
+                StoricoPassaggioMsg smsg = gson.fromJson(payload, StoricoPassaggioMsg.class);
+                handler.handleStoricoPassaggio(topic, smsg);
+            } else {
                 AutomobileMsg msg = gson.fromJson(payload, AutomobileMsg.class);
                 handler.handleMessage(topic, msg);
             }

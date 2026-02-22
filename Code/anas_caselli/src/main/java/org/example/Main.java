@@ -38,5 +38,6 @@ public class Main {
         PagamentoRoutes.register();
         EvasioneRoutes.register();
         InfrazioneVelocitaRoutes.register();
+        StoricoPassaggioRoutes.register();
     }
 }

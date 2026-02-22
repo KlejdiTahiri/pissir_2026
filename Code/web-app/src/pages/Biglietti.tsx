@@ -7,6 +7,41 @@ import type { Biglietto } from "./types/Biglietto.ts";
 import type { StoricoConPagamento } from "./types/StoricoConPagamento";
 import { caricaTrattaDaSessione, getIdTratta } from "./utils/SessionManager.ts";
 
+interface PagamentoRecord {
+  id: number;
+  targa: string;
+  data: string;
+  importo: number;
+  metodo: string;
+  statoPagamento: number;
+  idCasello: number;
+  cap: string;
+  direzione: string;
+}
+
+const adattaPagamento = (p: PagamentoRecord): StoricoConPagamento => ({
+  id: p.id,
+  targa: p.targa,
+
+  dataUscita: p.data,
+  dataPagamento: p.data,
+
+  capUscita: p.cap,
+  idCaselloUscita: p.idCasello,
+  direzioneUscita: p.direzione,
+
+  prezzoPagato: p.importo,
+  importo: p.importo,
+
+  // ✅ richiesto dal tuo StoricoConPagamento
+  metodoPagamento: p.metodo,
+
+  // ✅ quello che stai mostrando a video
+  metodoPagamentoStorico: p.metodo,
+
+  statoPagamento: p.statoPagamento,
+});
+
 
 
 function Biglietti() {
@@ -55,37 +90,61 @@ function Biglietti() {
         }
     };
 
-    // (Facoltativo) Fetch dei biglietti pagati
-    const fetchBigliettiPagati = async (idIn: string, capIn: string, dirIn: string,
-                                        idOut: string, capOut: string, dirOut: string) => {
-        setLoading(true);
-        setError(null);
+    const fetchBigliettiPagati = async (
+  idIn: string, capIn: string, dirIn: string,
+  idOut: string, capOut: string, dirOut: string
+) => {
+  setLoading(true);
+  setError(null);
 
-        try {
-            const queryParams = new URLSearchParams({
-                idCaselloIn: idIn.toString(),
-                capIn: capIn,
-                dirIn: dirIn,
-                idCaselloOut: idOut.toString(),
-                capOut: capOut,
-                dirOut: dirOut,
-            });
-            const response = await fetch(`/api/biglietti_pagati?${queryParams.toString()}`);
+  try {
+    const queryParams = new URLSearchParams({
+      idCaselloIn: idIn.toString(),
+      capIn,
+      dirIn,
+      idCaselloOut: idOut.toString(),
+      capOut,
+      dirOut,
+    });
 
-            if (!response.ok) {
-                throw new Error(`Errore HTTP: ${response.status} - ${response.statusText}`);
-            }
+    const response = await fetch(`/api/biglietti_pagati?${queryParams.toString()}`, {
+      credentials: "include",
+    });
 
-            const data: StoricoConPagamento[] = await response.json();
-            setBigliettiPagati(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Errore sconosciuto');
-            console.error('Errore nel caricamento dei biglietti pagati:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (!response.ok) {
+      throw new Error(`Errore HTTP: ${response.status} - ${response.statusText}`);
+    }
 
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      throw new Error(`Risposta non JSON ricevuta: ${text.substring(0, 200)}...`);
+    }
+
+    const payload = await response.json();
+    console.log("[DEBUG] payload /biglietti_pagati:", payload);
+
+    // ✅ accetta shape diverse
+    const raw: PagamentoRecord[] =
+      Array.isArray(payload) ? payload :
+      Array.isArray(payload?.data) ? payload.data :
+      Array.isArray(payload?.results) ? payload.results :
+      Array.isArray(payload?.biglietti) ? payload.biglietti :
+      [];
+
+    console.log("[DEBUG] raw length:", raw.length);
+
+    const adattati = raw.map(adattaPagamento);
+    setBigliettiPagati(adattati);
+
+    console.log("[DEBUG] adattati length:", adattati.length);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Errore sconosciuto");
+    console.error("Errore nel caricamento dei biglietti pagati:", err);
+  } finally {
+    setLoading(false);
+  }
+};
     // Caricamento dei biglietti emessi (validi) da tratta in sessione
     useEffect(() => {
         const trattaId = getIdTratta();
@@ -124,21 +183,18 @@ function Biglietti() {
         }
     }, [activeTab]);
 
-    /**useEffect(() => {
-     const handleBeforeUnload = () => {
-     const trattaId = getIdTratta();
-     if (trattaId !== null) {
-     clearIdTratta();
-     cancellaTrattaDaSessione(trattaId);
-     }
-     };
+    useEffect(() => {
+  if (activeTab === 'tutti' && bigliettiPagati.length === 0) {
+    const trattaId = getIdTratta();
+    const tratta = trattaId ? caricaTrattaDaSessione(trattaId) : null;
 
-     window.addEventListener("beforeunload", handleBeforeUnload);
-
-     return () => {
-     window.removeEventListener("beforeunload", handleBeforeUnload);
-     };
-     }, []);**/
+    if (!tratta) return;
+    fetchBigliettiPagati(
+      tratta.idCaselloIn, tratta.capIn, tratta.dirIn,
+      tratta.idCaselloOut, tratta.capOut, tratta.dirOut
+    );
+  }
+}, [activeTab, bigliettiPagati.length]);
 
 
     const handleBackToDashboard = () => {

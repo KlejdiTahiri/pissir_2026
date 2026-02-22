@@ -18,7 +18,6 @@ public class InfrazioneVelocitaRoutes {
         // POST /infrazione/velocita
         post("/infrazione/velocita", (req, res) -> {
             res.type("application/json");
-
             try {
                 JsonObject json = JsonParser.parseString(req.body()).getAsJsonObject();
 
@@ -31,7 +30,7 @@ public class InfrazioneVelocitaRoutes {
                     return gson.toJson(new RispostaErrore("Dati velocità mancanti"));
                 }
 
-                int v    = json.get("velocitaRilevata").getAsInt();
+                int v = json.get("velocitaRilevata").getAsInt();
                 int vmax = json.get("velocitaMassima").getAsInt();
                 if (v <= vmax) {
                     res.status(400);
@@ -49,9 +48,46 @@ public class InfrazioneVelocitaRoutes {
             }
         });
 
-        // GET /infrazione/velocita/:targa  →  ultima infrazione per targa
+        // ✅ PRIMA: route specifica (così non viene “mangiata” da :targa)
+        // GET /infrazione/velocita/casello?cap=MI&idCasello=1&direzione=INGRESSO
+        get("/infrazione/velocita/casello", (req, res) -> {
+            res.type("application/json");
+
+            System.out.println("[DEBUG] >>> GET /infrazione/velocita/casello");
+
+            String cap = req.queryParams("cap");
+            String idStr = req.queryParams("idCasello");
+            String dir = req.queryParams("direzione");
+
+            System.out.printf("[DEBUG] Parametri: cap='%s' idCasello='%s' direzione='%s'%n", cap, idStr, dir);
+
+            if (cap == null || cap.isBlank() || idStr == null || idStr.isBlank() || dir == null || dir.isBlank()) {
+                res.status(400);
+                return gson.toJson(new RispostaErrore("Parametri richiesti: cap, idCasello, direzione"));
+            }
+
+            int idCasello;
+            try {
+                idCasello = Integer.parseInt(idStr.trim());
+            } catch (Exception e) {
+                res.status(400);
+                return gson.toJson(new RispostaErrore("Parametro 'idCasello' non valido"));
+            }
+
+            var lista = InfrazioneVelocitaDao.tuttePerCasello(cap.trim(), idCasello, dir.trim());
+
+            System.out.println("[DEBUG] Risultati DAO: " + lista.size());
+
+            // ✅ Meglio 200 sempre (il frontend gestisce lista vuota senza “error state”)
+            res.status(200);
+            return gson.toJson(lista);
+        });
+
+        // DOPO: route parametrica generica
+        // GET /infrazione/velocita/:targa
         get("/infrazione/velocita/:targa", (req, res) -> {
             res.type("application/json");
+
             String targa = req.params(":targa");
 
             JsonObject last = InfrazioneVelocitaDao.ultimaPerTarga(targa);
@@ -62,32 +98,6 @@ public class InfrazioneVelocitaRoutes {
 
             res.status(200);
             return gson.toJson(last);
-        });
-
-        // GET /infrazione/velocita/tratta/:idTratta  →  tutte le infrazioni di una tratta
-        get("/infrazione/velocita/tratta/:idTratta", (req, res) -> {
-            res.type("application/json");
-
-            try {
-                int idTratta = Integer.parseInt(req.params(":idTratta"));
-                var lista = InfrazioneVelocitaDao.tuttePerTratta(idTratta);
-
-                if (lista.isEmpty()) {
-                    res.status(404);
-                    return gson.toJson(new RispostaErrore("Nessuna infrazione trovata per questa tratta"));
-                }
-
-                res.status(200);
-                return gson.toJson(lista);
-
-            } catch (NumberFormatException e) {
-                res.status(400);
-                return gson.toJson(new RispostaErrore("ID tratta non valido"));
-            } catch (Exception e) {
-                e.printStackTrace();
-                res.status(500);
-                return gson.toJson(new RispostaErrore("Errore interno server"));
-            }
         });
     }
 }

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import MQTT.client.publishers.PublisherPagamento;
+import MQTT.client.publishers.PublisherStoricoPassaggio;
 import static MQTT.client.publishers.util.AssegnaIdTratta.scegliTrattaCompatibile;
 
 public class MainLauncher {
@@ -93,9 +95,26 @@ public class MainLauncher {
             Thread.sleep(PAUSA_TRA_USCITE_MS);
             PublisherUscita.main(new String[]{String.valueOf(idBiglietto)});
             System.out.println("✅ Uscita pubblicata per biglietto " + idBiglietto);
+
+            // ✅ Pagamento + Storico
+            int distanzaKm = generaDistanzaCasuale();
+
+            PublisherPagamento.PagamentoEsito esito = PublisherPagamento.publishPagamentoAndReturn(idBiglietto, distanzaKm);
+
+            if (esito == null) {
+                System.out.println("⚠️ Pagamento non pubblicato: salto storico per biglietto " + idBiglietto);
+            } else {
+                PublisherStoricoPassaggio.publishStorico(idBiglietto, distanzaKm, esito.prezzo, esito.metodo, esito.pagato);
+                System.out.println("📚 Storico passaggio pubblicato per biglietto " + idBiglietto);
+            }
         }
 
         System.out.println("\n🏁 Procedura completata (ingressi + guasto + incidente + infrazioni + uscite).");
+    }
+
+    private static int generaDistanzaCasuale() {
+        // distanza realistica (km)
+        return 20 + new Random().nextInt(281); // 20..300
     }
 
     // ✅ Simulazione infrazioni velocità: sceglie ingressi reali già raccolti

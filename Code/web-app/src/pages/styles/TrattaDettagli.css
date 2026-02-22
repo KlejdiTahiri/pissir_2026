@@ -460,3 +460,243 @@
     color: #bceeac;
     margin-top: 4px;
 }
+
+
+
+/* ================================
+   MODALI - BASE (overlay + card)
+================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 16px;
+  width: min(1100px, 96vw);   /* ⬅️ più largo */
+  max-height: 86vh;
+  overflow: auto;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.modal-content h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px 0;
+  color: #0f172a;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modal-actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-actions button:hover {
+  filter: brightness(0.98);
+}
+
+/* ================================
+   MODALE INFRAZIONI - HEADER
+================================ */
+.modal-infrazioni {
+  padding: 18px 18px 14px 18px;
+}
+
+.modal-infrazioni-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.modal-infrazioni-header h2 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.infrazioni-summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.summary-chip {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.summary-chip-money {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.22);
+  color: #065f46;
+}
+
+/* ================================
+   TABELLA INFRAZIONI - LEGGIBILITÀ
+================================ */
+.infrazioni-table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.infrazioni-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.infrazioni-table thead th {
+  background: #f8fafc;
+  color: #0f172a;
+  text-align: left;
+  padding: 12px 12px;
+  font-weight: 800;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.infrazioni-table tbody td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #eef2f7;
+  color: #111827;
+  vertical-align: middle;
+}
+
+.infrazioni-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.infrazioni-table thead th {
+  padding: 14px 18px;   /* ⬅️ più aria tra le colonne */
+}
+
+.infrazioni-table tbody td {
+  padding: 13px 18px;   /* ⬅️ più leggibile */
+}
+
+.infrazioni-table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow-x: auto;   /* ⬅️ scroll orizzontale se serve */
+  background: #fff;
+}
+
+.infrazioni-table {
+  width: 100%;
+  min-width: 950px;   /* ⬅️ impedisce colonne troppo strette */
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+/* Celle “importanti” */
+.targa-cell {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #0f172a;
+}
+
+.multa-cell {
+  font-weight: 900;
+  color: #065f46;
+}
+
+.timestamp-cell {
+  color: #475569;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+/* Velocità/eccesso evidenziati */
+.speed-cell {
+  font-weight: 900;
+  color: #b91c1c;
+  white-space: nowrap;
+}
+
+.excess-cell {
+  font-weight: 900;
+  color: #dc2626;
+  white-space: nowrap;
+}
+
+/* Badge gravità */
+.gravita-badge {
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ================================
+   CARD INFRAZIONI - PREVIEW
+================================ */
+.infrazioni-card .big-number {
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.infrazioni-card .detail-subtitle {
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+/* Barra */
+.infrazioni-bar-wrapper {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.infrazioni-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+/* Hint */
+.infrazioni-hint {
+  margin-top: 6px;
+  color: #64748b;
+  font-weight: 700;
+}

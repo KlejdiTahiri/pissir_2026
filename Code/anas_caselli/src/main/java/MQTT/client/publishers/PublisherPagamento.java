@@ -217,4 +217,115 @@ public class PublisherPagamento {
             this.pagato = pagato;
         }
     }
+
+
+    public static PagamentoEsito publishPagamentoAndReturn(int idBiglietto, int distanza) throws Exception {
+        InputStream isUscita = PublisherPagamento.class.getClassLoader().getResourceAsStream("pedaggi_uscita.txt");
+        InputStream isEntrata = PublisherPagamento.class.getClassLoader().getResourceAsStream("pedaggi_entrata.txt");
+
+        if (isUscita == null || isEntrata == null) {
+            System.out.println("⚠️ pedaggi_uscita.txt o pedaggi_entrata.txt non trovato nel classpath!");
+            return null;
+        }
+
+        List<String> uscite = new BufferedReader(new InputStreamReader(isUscita)).lines().toList();
+        List<String> entrate = new BufferedReader(new InputStreamReader(isEntrata)).lines().toList();
+
+        Optional<JsonObject> uscitaOpt = uscite.stream()
+                .map(r -> gson.fromJson(r, JsonObject.class))
+                .filter(o -> o.has("idBiglietto") && o.get("idBiglietto").getAsInt() == idBiglietto)
+                .findFirst();
+
+        if (uscitaOpt.isEmpty()) {
+            System.out.println("❌ Pagamento: uscita non trovata per idBiglietto=" + idBiglietto);
+            return null;
+        }
+
+        JsonObject uscita = uscitaOpt.get();
+
+        String targa = uscita.get("targa").getAsString();
+        String dataSolo = uscita.get("timestamp").getAsString().substring(0, 10);
+
+        Optional<JsonObject> entrataOpt = entrate.stream()
+                .map(r -> gson.fromJson(r, JsonObject.class))
+                .filter(o ->
+                        o.has("targa") && targa.equals(o.get("targa").getAsString()) &&
+                                o.has("timestamp") && o.get("timestamp").getAsString().startsWith(dataSolo) &&
+                                o.has("idBiglietto") && o.get("idBiglietto").getAsInt() == idBiglietto
+                ).findFirst();
+
+        if (entrataOpt.isEmpty()) {
+            System.out.println("❌ Pagamento: entrata non trovata per targa=" + targa + " idBiglietto=" + idBiglietto);
+            return null;
+        }
+
+        JsonObject entrata = entrataOpt.get();
+
+        String capIn = entrata.get("cap").getAsString();
+        int idCaselloIn = entrata.get("idCasello").getAsInt();
+        String dirIn = entrata.get("direzione").getAsString();
+
+        String capOut = uscita.get("cap").getAsString();
+        int idCaselloOut = uscita.get("idCasello").getAsInt();
+        String dirOut = uscita.get("direzione").getAsString();
+
+        Double prezzo = prezzoDaDb(capIn, idCaselloIn, dirIn, capOut, idCaselloOut, dirOut);
+        if (prezzo == null) prezzo = prezzoDaDbSoloCap(capIn, capOut);
+
+        if (prezzo == null) {
+            System.out.println("⚠️ Pagamento: prezzo NON trovato in DB per tratta.");
+            return null;
+        }
+
+        MetodoEsito me = scegliMetodo();
+
+        PagamentoMsg msg = new PagamentoMsg();
+        msg.setIdBiglietto(idBiglietto);
+        msg.setTarga(targa);
+
+        msg.setCapIn(capIn);
+        msg.setIdCaselloIn(idCaselloIn);
+        msg.setDirezioneIn(dirIn);
+
+        msg.setCapOut(capOut);
+        msg.setIdCaselloOut(idCaselloOut);
+        msg.setDirezioneOut(dirOut);
+
+        msg.setDistanza(distanza);
+        msg.setImporto(prezzo);
+
+        msg.setMetodo(me.metodo);
+        msg.setPagato(me.pagato);
+
+        SSLTrust.trustAllCerts();
+        MqttClient client = new MqttClient(BROKER, MqttClient.generateClientId());
+        client.connect();
+
+        String topic = TOPIC_PREFIX + idBiglietto;
+        String payload = gson.toJson(msg);
+
+        MqttMessage mqttMsg = new MqttMessage(payload.getBytes());
+        mqttMsg.setQos(0);
+        client.publish(topic, mqttMsg);
+
+        System.out.printf("💳 Pagamento pubblicato su %s | %s | pagato=%s | €%.2f | targa=%s%n",
+                topic, me.metodo, me.pagato, prezzo, targa);
+
+        client.disconnect();
+        client.close();
+
+        return new PagamentoEsito(me.metodo, me.pagato, prezzo);
+    }
+
+    public static class PagamentoEsito {
+        public final String metodo;   // TELEPASS / CONTANTI / EVASIONE
+        public final boolean pagato;  // true/false
+        public final double prezzo;   // importo
+
+        public PagamentoEsito(String metodo, boolean pagato, double prezzo) {
+            this.metodo = metodo;
+            this.pagato = pagato;
+            this.prezzo = prezzo;
+        }
+    }
 }
