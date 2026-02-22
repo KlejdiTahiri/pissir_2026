@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/home/boli/Scrivania/anas_caselli/Code/anas_caselli/src/main/java/Dao/db_sqlite" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="3947"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,7:mainveicoli"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="autostrada" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="64"/><column index="2" value="88"/><column index="3" value="127"/><column index="4" value="125"/><column index="5" value="130"/><column index="6" value="58"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="pagamenti" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="41"/><column index="2" value="69"/><column index="3" value="130"/><column index="4" value="57"/><column index="5" value="58"/><column index="6" value="118"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tratte" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="41"/><column index="2" value="45"/><column index="3" value="84"/><column index="4" value="60"/><column index="5" value="55"/><column index="6" value="94"/><column index="7" value="50"/><column index="8" value="47"/><column index="9" value="72"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="veicoli" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="69"/><column index="2" value="111"/><column index="3" value="49"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">-- Utenti
+INSERT INTO utenti (username, password_hash, ruolo) VALUES
+('admin1', 'hash_admin1', 'admin'),
+('manager1', 'hash_manager1', 'manager');
+
+-- Veicoli
+INSERT INTO veicoli (targa, modello, colore) VALUES
+('AB123CD', 'Fiat Panda', 'Bianco'),
+('EF456GH', 'Volkswagen Golf', 'Nero'),
+('IJ789KL', 'Renault Clio', 'Blu'),
+('MN012OP', 'Tesla Model 3', 'Rosso'),
+('QR345ST', 'Toyota Yaris', 'Grigio');
+
+-- Caselli
+INSERT INTO caselli (cap, id_casello, direzione, stato) VALUES
+('MI', 1, 'ingresso', 1),
+('MI', 2, 'uscita', 1),
+('RM', 1, 'ingresso', 1),
+('RM', 2, 'uscita', 1),
+('NA', 1, 'ingresso', 1),
+('NA', 2, 'uscita', 1);
+
+-- Tratte (solo ingresso -&gt; uscita)
+INSERT INTO tratte (cap_in, id_casello_in, dir_in, cap_out, id_casello_out, dir_out, prezzo, chilometri) VALUES
+('MI', 1, 'ingresso', 'RM', 2, 'uscita', 20.50, 580),
+('MI', 1, 'ingresso', 'NA', 2, 'uscita', 25.00, 780),
+('RM', 1, 'ingresso', 'NA', 2, 'uscita', 15.00, 230),
+('MI', 1, 'ingresso', 'MI', 2, 'uscita', 1.00, 10),
+('RM', 1, 'ingresso', 'RM', 2, 'uscita', 0.80, 8);
+
+-- Biglietti (ingresso)
+INSERT INTO biglietti (targa, cap_ingresso, id_casello_ingresso, direzione_ingresso, data_ingresso, valido) VALUES
+('AB123CD', 'MI', 1, 'ingresso', datetime('now', '-2 hours'), 1),
+('EF456GH', 'MI', 1, 'ingresso', datetime('now', '-3 hours'), 1),
+('IJ789KL', 'RM', 1, 'ingresso', datetime('now', '-1 hours'), 1),
+('MN012OP', 'RM', 1, 'ingresso', datetime('now', '-4 hours'), 1),
+('QR345ST', 'NA', 1, 'ingresso', datetime('now', '-150 minutes'), 1);
+
+-- Stato attuale dei veicoli in autostrada
+INSERT INTO autostrada (targa, cap_ingresso, id_casello_ingresso, direzione_ingresso, data_ingresso, telepass) VALUES
+('AB123CD', 'MI', 1, 'ingresso', datetime('now', '-2 hours'), 0),
+('EF456GH', 'MI', 1, 'ingresso', datetime('now', '-3 hours'), 1),
+('IJ789KL', 'RM', 1, 'ingresso', datetime('now', '-1 hours'), 0);
+
+-- Storico passaggi (ingresso -&gt; uscita)
+INSERT INTO storico_passaggi (targa, cap_ingresso, id_casello_ingresso, direzione_ingresso, cap_uscita, id_casello_uscita, direzione_uscita, data_ingresso, data_uscita, chilometri, velocita_media, telepass, prezzo_pagato, metodo_pagamento) VALUES
+('MN012OP', 'RM', 1, 'ingresso', 'NA', 2, 'uscita', datetime('now', '-4 hours'), datetime('now', '-1 hours'), 230, 76.7, 0, 15.00, 'contanti'),
+('QR345ST', 'NA', 1, 'ingresso', 'MI', 2, 'uscita', datetime('now', '-210 minutes'), datetime('now', '-60 minutes'), 780, 325.5, 1, 25.00, 'telepass'),
+('AB123CD', 'MI', 1, 'ingresso', 'MI', 2, 'uscita', datetime('now', '-5 hours'), datetime('now', '-4 hours'), 10, 10.0, 0, 1.00, 'contanti'),
+('EF456GH', 'MI', 1, 'ingresso', 'RM', 2, 'uscita', datetime('now', '-6 hours'), datetime('now', '-2 hours'), 580, 145.0, 1, 20.50, 'telepass'),
+('IJ789KL', 'RM', 1, 'ingresso', 'RM', 2, 'uscita', datetime('now', '-2 hours'), datetime('now', '-90 minutes'), 8, 16.0, 0, 0.80, 'contanti');
+
+-- Pagamenti
+INSERT INTO pagamenti (targa, data, importo, metodo, stato_pagamento) VALUES
+('MN012OP', datetime('now', '-1 hours'), 15.00, 'contanti', 1),
+('QR345ST', datetime('now', '-1 hours'), 25.00, 'telepass', 0),
+('AB123CD', datetime('now', '-4 hours'), 1.00, 'contanti', 1),
+('EF456GH', datetime('now', '-2 hours'), 20.50, 'telepass', 0),
+('IJ789KL', datetime('now', '-90 minutes'), 0.80, 'contanti', 1);
+</sql><current_tab id="0"/></tab_sql></sqlb_project>

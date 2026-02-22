@@ -1,0 +1,213 @@
+CREATE TABLE pagamenti_new (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    targa TEXT,
+    data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    importo REAL,
+    metodo TEXT,
+    stato_pagamento INTEGER,
+    id_casello INTEGER,
+    cap TEXT,
+    direzione TEXT,
+    FOREIGN KEY(targa) REFERENCES veicoli(targa),
+    FOREIGN KEY(cap, id_casello, direzione)
+        REFERENCES caselli(cap, id_casello, direzione)
+);
+
+INSERT INTO pagamenti_new (id, targa, data, importo, metodo, stato_pagamento)
+SELECT id, targa, data, importo, metodo, stato_pagamento
+FROM pagamenti;
+
+DROP TABLE pagamenti;
+
+ALTER TABLE pagamenti_new RENAME TO pagamenti;
+
+
+
+
+DROP TABLE IF EXISTS tratte;
+
+CREATE TABLE tratte (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cap_in TEXT NOT NULL,
+  id_casello_in INTEGER NOT NULL,
+  dir_in TEXT NOT NULL,
+  cap_out TEXT NOT NULL,
+  id_casello_out INTEGER NOT NULL,
+  dir_out TEXT NOT NULL,
+  prezzo REAL NOT NULL,
+  chilometri INTEGER NOT NULL,
+  velocita_massima INTEGER NOT NULL,
+  stato INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_tratte
+ON tratte (cap_in, id_casello_in, dir_in, cap_out, id_casello_out, dir_out);
+
+-- 1) Elenco caselli: lo prendiamo "hardcoded" dal tuo input
+WITH
+caselli(cap, id_casello, direzione, stato) AS (
+  VALUES
+  ('MI',1,'INGRESSO',1),
+  ('MI',2,'USCITA',1),
+  ('RM',1,'INGRESSO',1),
+  ('RM',2,'USCITA',1),
+
+  ('MI',1,'INGRESSO',1),
+  ('MI',2,'INGRESSO',1),
+  ('FI',1,'INGRESSO',1),
+  ('FI',2,'INGRESSO',1),
+  ('NA',1,'INGRESSO',1),
+  ('NA',2,'INGRESSO',1),
+  ('TO',1,'INGRESSO',1),
+  ('TO',2,'INGRESSO',1),
+  ('RM',1,'INGRESSO',1),
+  ('RM',2,'INGRESSO',1),
+  ('AL',1,'INGRESSO',1),
+  ('AL',2,'INGRESSO',1),
+  ('BA',1,'INGRESSO',1),
+  ('BA',2,'INGRESSO',1),
+
+  ('MI',3,'USCITA',1),
+  ('MI',4,'USCITA',1),
+  ('FI',3,'USCITA',1),
+  ('FI',4,'USCITA',1),
+  ('NA',3,'USCITA',1),
+  ('NA',4,'USCITA',1),
+  ('TO',3,'USCITA',1),
+  ('TO',4,'USCITA',1),
+  ('RM',3,'USCITA',1),
+  ('RM',4,'USCITA',1),
+  ('AL',3,'USCITA',1),
+  ('AL',4,'USCITA',1),
+  ('BA',3,'USCITA',1),
+  ('BA',4,'USCITA',1)
+),
+ingressi AS (
+  SELECT DISTINCT UPPER(cap) AS cap, id_casello
+  FROM caselli
+  WHERE stato=1 AND UPPER(direzione)='INGRESSO'
+),
+uscite AS (
+  SELECT DISTINCT UPPER(cap) AS cap, id_casello
+  FROM caselli
+  WHERE stato=1 AND UPPER(direzione)='USCITA'
+),
+
+-- 2) Matrice base CAP->CAP (presa dai dati che avevi)
+base(cap_in, cap_out, prezzo, chilometri, vmax) AS (
+  VALUES
+  ('MI','RM',20.56,580,130),
+  ('MI','MI',1.00,10,90),
+  ('RM','RM',20.00,8,110),
+  ('MI','NA',45.50,770,130),
+  ('TO','RM',60.00,670,130),
+  ('FI','TO',20.00,320,130),
+  ('RM','NA',15.00,230,130),
+  ('NA','BA',12.00,260,120),
+  ('MI','AL',6.00,90,130),
+  ('BA','RM',25.00,450,130),
+  ('AL','TO',5.00,100,110),
+  ('MI','FI',30.00,300,130),
+  ('MI','TO',20.00,150,130),
+  ('FI','MI',30.00,300,130),
+  ('FI','NA',45.00,450,130),
+  ('FI','RM',20.00,260,130),
+  ('FI','AL',18.00,240,130),
+  ('FI','BA',55.00,650,130),
+  ('NA','MI',80.00,800,130),
+  ('NA','FI',45.00,450,130),
+  ('NA','TO',90.00,900,130),
+  ('NA','AL',70.00,700,130),
+  ('NA','BA',15.00,180,130),
+  ('TO','FI',25.00,280,130),
+  ('TO','NA',90.00,900,130),
+  ('TO','AL',10.00,120,130),
+  ('TO','BA',85.00,950,130),
+  ('RM','FI',20.00,260,130),
+  ('RM','TO',60.00,650,130),
+  ('RM','AL',50.00,550,130),
+  ('RM','BA',35.00,400,130),
+  ('AL','FI',18.00,240,130),
+  ('AL','NA',70.00,700,130),
+  ('AL','RM',50.00,550,130),
+  ('AL','BA',60.00,700,130),
+  ('BA','FI',55.00,650,130),
+  ('BA','TO',85.00,950,130),
+  ('BA','AL',60.00,700,130)
+)
+
+INSERT OR IGNORE INTO tratte
+(cap_in, id_casello_in, dir_in, cap_out, id_casello_out, dir_out, prezzo, chilometri, velocita_massima, stato)
+SELECT
+  i.cap,
+  i.id_casello,
+  'INGRESSO',
+  u.cap,
+  u.id_casello,
+  'USCITA',
+  COALESCE(b.prezzo, 20.0) AS prezzo,        -- default se manca la coppia CAP->CAP
+  COALESCE(b.chilometri, 200) AS chilometri, -- default
+  COALESCE(b.vmax, 130) AS velocita_massima,
+  1 AS stato
+FROM ingressi i
+CROSS JOIN uscite u
+LEFT JOIN base b
+  ON b.cap_in = i.cap AND b.cap_out = u.cap;
+
+-- Verifica: 196
+SELECT COUNT(*) AS totale_tratte
+FROM tratte
+WHERE stato=1 AND dir_in='INGRESSO' AND dir_out='USCITA';
+
+
+
+CREATE TABLE IF NOT EXISTS evasioni (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_biglietto INTEGER,
+  targa TEXT NOT NULL,
+  data DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  importo REAL,
+  metodo TEXT,                 -- es. "EVASIONE"
+  distanza INTEGER,
+
+  cap_in TEXT,
+  id_casello_in INTEGER,
+  direzione_in TEXT,
+
+  cap_out TEXT,
+  id_casello_out INTEGER,
+  direzione_out TEXT,
+
+  note TEXT
+);
+
+
+
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS infrazioni_velocita (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_biglietto    INTEGER NOT NULL,
+    targa           TEXT    NOT NULL,
+
+    cap             TEXT    NOT NULL,
+    id_casello      INTEGER NOT NULL,
+    direzione       TEXT    NOT NULL,
+
+    id_tratta       INTEGER DEFAULT 0,
+    km_rilevazione  REAL    NOT NULL,
+    velocita_rilevata INTEGER NOT NULL,
+    velocita_massima  INTEGER NOT NULL,
+
+    importo         REAL    NOT NULL,
+    timestamp       TEXT    NOT NULL,
+
+    stato           INTEGER DEFAULT 1
+);
+
+CREATE INDEX IF NOT EXISTS idx_infrazioni_velocita_targa ON infrazioni_velocita(targa);
+CREATE INDEX IF NOT EXISTS idx_infrazioni_velocita_biglietto ON infrazioni_velocita(id_biglietto);

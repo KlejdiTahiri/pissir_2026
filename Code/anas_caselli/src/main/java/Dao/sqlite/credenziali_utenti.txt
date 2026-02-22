@@ -1,0 +1,37 @@
+-- Password: password123
+-- Hash generato con BCrypt (salt: 10)
+-- Ruolo: admin
+
+INSERT INTO utenti (username, password_hash, ruolo)
+VALUES (
+  'operatore1',
+  '$2a$10$m1iN/F5HpH5b13J3G8AH3uITpP6XYxh1uUDN6lxYXm1CEkUt3zrbi',
+  'admin'
+);
+
+
+-- CREDENZIALI UTENTE --
+
+INSERT INTO utenti (username, password_hash, ruolo)
+VALUES ('mario_rossi', '$2a$10$gA6qKkUMDo82R1L4JSNqOe7dhH7gysqTo8ZMa4W0joDJGk88LJKuK', 'admin');
+
+INSERT INTO utenti (username, password_hash, ruolo)
+VALUES ('giulia_bianchi', '$2a$10$u8qvRcbN5YvFgO/MB03k9uxPQoFL5vQPC5aUlSKbW6ELkObbZ9zWS', 'user');
+
+INSERT INTO utenti (username, password_hash, ruolo)
+VALUES ('luca_verdi', '$2a$10$1zOgjy1p.zrVgQflhYXdiuOYDE91eTx6SP5NB/9U0N38AY3RLH/xO', 'moderatore');
+
+INSERT INTO utenti (username, password_hash, ruolo)
+VALUES ('anna_neri', '$2a$10$6jAbf9lhBdOfZ49D/C3q5eGbyUv0Njtd0cUP2FQz9knVP74HKZQQe', 'user');
+
+
+
+--USA QUESTE
+Credenziali:
+
+username = mario_rossi | pass = 123
+
+username = waluigi | pass = 123
+
+username = bowser | pass = 123
+

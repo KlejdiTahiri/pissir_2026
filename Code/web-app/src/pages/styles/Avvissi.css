@@ -1,0 +1,150 @@
+/* Stili per la sezione avvisi */
+.avvisi-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.avvisi-section h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #1f2937;
+}
+
+.avvisi-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.avviso {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f3f4f6;
+    transition: all 0.2s ease;
+}
+
+.avviso span {
+    font-size: 1.5rem;
+}
+
+.avviso p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.avviso.incident {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+}
+
+.avviso.construction {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+}
+
+.avviso.all-clear {
+    background: #d1fae5;
+    border-left: 4px solid #22c55e;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.cursor-pointer:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Overlay del popup */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 1000;
+}
+
+/* Contenuto del popup */
+.popup-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 28rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.popup-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.popup-close-btn:hover {
+    transform: scale(1.1);
+}
+
+.popup-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #1f2937;
+}
+
+/* Lista incidenti */
+.incidenti-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.incidente-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background: #f9fafb;
+}
+
+.incidente-card p {
+    margin: 6px 0;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.incidente-card strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .popup-content {
+        max-width: 100%;
+        margin: 16px;
+    }
+}

@@ -1,0 +1,309 @@
+/* src/pages/Login.css */
+
+.login-container {
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #38a169 0%, #15ae60 100%); /* verde */
+    padding: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.login-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    margin-bottom: 1rem;
+}
+
+.logo-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.subtitle {
+    color: #718096;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.login-form {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #38a169; /* verde */
+    box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.2); /* verde con opacità */
+}
+
+.form-group input:disabled {
+    background-color: #f7fafc;
+    cursor: not-allowed;
+}
+
+/* CORREZIONE: Container per input password con posizionamento relativo */
+.password-input-container {
+    position: relative;
+}
+
+.password-input-container input {
+    padding-right: 2.5rem; /* Spazio per l'icona */
+    width: 100%;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.25rem;
+    margin: 0;
+    color: #718096;
+    z-index: 2;
+}
+
+.password-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.password-toggle:hover {
+    color: #2d3748;
+}
+
+.password-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.password-toggle:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.remember-me input {
+    width: auto;
+    margin: 0;
+}
+
+.forgot-password {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(0, 255, 17, 0.76) 0%, #15ae60 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.login-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(4, 150, 13, 0.76);
+}
+
+.login-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.login-btn.loading {
+    background: #a0aec0;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.divider {
+    text-align: center;
+    margin: 2rem 0;
+    position: relative;
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.divider span {
+    background: white;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.signup-link {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+.signup-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.5rem;
+    }
+
+    .logo h1 {
+        font-size: 1.5rem;
+    }
+
+    .login-container {
+        padding: 0.5rem;
+    }
+
+    .form-group input {
+        padding: 0.6rem 0.8rem;
+    }
+
+    .login-btn {
+        padding: 0.75rem 1rem;
+    }
+
+    /* CORREZIONE: Assicura che l'icona sia visibile anche su mobile */
+    .password-toggle {
+        right: 0.6rem;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .login-card {
+        padding: 1rem;
+    }
+
+    .password-toggle {
+        right: 0.5rem;
+        font-size: 1rem;
+    }
+}

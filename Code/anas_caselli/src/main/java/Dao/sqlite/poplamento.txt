@@ -1,0 +1,159 @@
+-- Utenti
+INSERT INTO utenti (username, password_hash, ruolo) VALUES
+('admin1', 'hash_admin1', 'admin'),
+('manager1', 'hash_manager1', 'manager');
+
+-- Veicoli
+INSERT INTO veicoli (targa, modello, colore) VALUES
+('AB123CD', 'Fiat Panda', 'Bianco'),
+('EF456GH', 'Volkswagen Golf', 'Nero'),
+('IJ789KL', 'Renault Clio', 'Blu'),
+('MN012OP', 'Tesla Model 3', 'Rosso'),
+('QR345ST', 'Toyota Yaris', 'Grigio');
+
+-- Caselli
+INSERT INTO caselli (cap, id_casello, direzione, stato) VALUES
+('MI', 1, 'ingresso', 1),
+('MI', 2, 'uscita', 1),
+('RM', 1, 'ingresso', 1),
+('RM', 2, 'uscita', 1),
+('NA', 1, 'ingresso', 1),
+('NA', 2, 'uscita', 1);
+
+-- Tratte (solo ingresso -> uscita)
+INSERT INTO tratte (cap_in, id_casello_in, dir_in, cap_out, id_casello_out, dir_out, prezzo, chilometri) VALUES
+('MI', 1, 'ingresso', 'RM', 2, 'uscita', 20.50, 580),
+('MI', 1, 'ingresso', 'NA', 2, 'uscita', 25.00, 780),
+('RM', 1, 'ingresso', 'NA', 2, 'uscita', 15.00, 230),
+('MI', 1, 'ingresso', 'MI', 2, 'uscita', 1.00, 10),
+('RM', 1, 'ingresso', 'RM', 2, 'uscita', 0.80, 8);
+
+-- Biglietti (ingresso)
+INSERT INTO biglietti (targa, cap_ingresso, id_casello_ingresso, direzione_ingresso, data_ingresso, valido) VALUES
+('AB123CD', 'MI', 1, 'ingresso', datetime('now', '-2 hours'), 1),
+('EF456GH', 'MI', 1, 'ingresso', datetime('now', '-3 hours'), 1),
+('IJ789KL', 'RM', 1, 'ingresso', datetime('now', '-1 hours'), 1),
+('MN012OP', 'RM', 1, 'ingresso', datetime('now', '-4 hours'), 1),
+('QR345ST', 'NA', 1, 'ingresso', datetime('now', '-150 minutes'), 1);
+
+-- Stato attuale dei veicoli in autostrada
+INSERT INTO autostrada (targa, cap_ingresso, id_casello_ingresso, direzione_ingresso, data_ingresso, telepass) VALUES
+('AB123CD', 'MI', 1, 'ingresso', datetime('now', '-2 hours'), 0),
+('EF456GH', 'MI', 1, 'ingresso', datetime('now', '-3 hours'), 1),
+('IJ789KL', 'RM', 1, 'ingresso', datetime('now', '-1 hours'), 0);
+
+-- Storico passaggi (ingresso -> uscita)
+INSERT INTO storico_passaggi (targa, cap_ingresso, id_casello_ingresso, direzione_ingresso, cap_uscita, id_casello_uscita, direzione_uscita, data_ingresso, data_uscita, chilometri, velocita_media, telepass, prezzo_pagato, metodo_pagamento) VALUES
+('MN012OP', 'RM', 1, 'ingresso', 'NA', 2, 'uscita', datetime('now', '-4 hours'), datetime('now', '-1 hours'), 230, 76.7, 0, 15.00, 'contanti'),
+('QR345ST', 'NA', 1, 'ingresso', 'MI', 2, 'uscita', datetime('now', '-210 minutes'), datetime('now', '-60 minutes'), 780, 325.5, 1, 25.00, 'telepass'),
+('AB123CD', 'MI', 1, 'ingresso', 'MI', 2, 'uscita', datetime('now', '-5 hours'), datetime('now', '-4 hours'), 10, 10.0, 0, 1.00, 'contanti'),
+('EF456GH', 'MI', 1, 'ingresso', 'RM', 2, 'uscita', datetime('now', '-6 hours'), datetime('now', '-2 hours'), 580, 145.0, 1, 20.50, 'telepass'),
+('IJ789KL', 'RM', 1, 'ingresso', 'RM', 2, 'uscita', datetime('now', '-2 hours'), datetime('now', '-90 minutes'), 8, 16.0, 0, 0.80, 'contanti');
+
+-- Pagamenti
+INSERT INTO pagamenti (targa, data, importo, metodo, stato_pagamento) VALUES
+('MN012OP', datetime('now', '-1 hours'), 15.00, 'contanti', 1),
+('QR345ST', datetime('now', '-1 hours'), 25.00, 'telepass', 0),
+('AB123CD', datetime('now', '-4 hours'), 1.00, 'contanti', 1),
+('EF456GH', datetime('now', '-2 hours'), 20.50, 'telepass', 0),
+('IJ789KL', datetime('now', '-90 minutes'), 0.80, 'contanti', 1);
+
+
+
+-- Tratte
+INSERT INTO tratte
+(cap_in, id_casello_in, dir_in, cap_out, id_casello_out, dir_out,
+ prezzo, chilometri, velocita_massima, stato)
+VALUES
+-- MI ->
+('MI', 1, 'INGRESSO', 'FI', 3, 'USCITA', 30, 300, 130, 1),
+('MI', 1, 'INGRESSO', 'NA', 3, 'USCITA', 80, 800, 130, 1),
+('MI', 1, 'INGRESSO', 'TO', 3, 'USCITA', 20, 150, 130, 1),
+
+-- FI ->
+('FI', 1, 'INGRESSO', 'MI', 3, 'USCITA', 30, 300, 130, 1),
+('FI', 1, 'INGRESSO', 'NA', 3, 'USCITA', 45, 450, 130, 1),
+('FI', 1, 'INGRESSO', 'TO', 3, 'USCITA', 25, 280, 130, 1),
+('FI', 1, 'INGRESSO', 'RM', 3, 'USCITA', 20, 260, 130, 1),
+('FI', 1, 'INGRESSO', 'AL', 3, 'USCITA', 18, 240, 130, 1),
+('FI', 1, 'INGRESSO', 'BA', 3, 'USCITA', 55, 650, 130, 1),
+
+-- NA ->
+('NA', 1, 'INGRESSO', 'MI', 3, 'USCITA', 80, 800, 130, 1),
+('NA', 1, 'INGRESSO', 'FI', 3, 'USCITA', 45, 450, 130, 1),
+('NA', 1, 'INGRESSO', 'TO', 3, 'USCITA', 90, 900, 130, 1),
+('NA', 1, 'INGRESSO', 'AL', 3, 'USCITA', 70, 700, 130, 1),
+('NA', 1, 'INGRESSO', 'BA', 3, 'USCITA', 15, 180, 130, 1),
+
+-- TO (casello ingresso = 2)
+('TO', 2, 'INGRESSO', 'FI', 3, 'USCITA', 25, 280, 130, 1),
+('TO', 2, 'INGRESSO', 'NA', 3, 'USCITA', 90, 900, 130, 1),
+('TO', 2, 'INGRESSO', 'RM', 3, 'USCITA', 60, 650, 130, 1),
+('TO', 2, 'INGRESSO', 'AL', 3, 'USCITA', 10, 120, 130, 1),
+('TO', 2, 'INGRESSO', 'BA', 3, 'USCITA', 85, 950, 130, 1),
+
+-- RM (solo ingresso = 1)
+('RM', 1, 'INGRESSO', 'FI', 3, 'USCITA', 20, 260, 130, 1),
+('RM', 1, 'INGRESSO', 'TO', 3, 'USCITA', 60, 650, 130, 1),
+('RM', 1, 'INGRESSO', 'AL', 3, 'USCITA', 50, 550, 130, 1),
+('RM', 1, 'INGRESSO', 'BA', 3, 'USCITA', 35, 400, 130, 1),
+
+-- AL (casello ingresso = 2)
+('AL', 2, 'INGRESSO', 'FI', 3, 'USCITA', 18, 240, 130, 1),
+('AL', 2, 'INGRESSO', 'NA', 3, 'USCITA', 70, 700, 130, 1),
+('AL', 2, 'INGRESSO', 'RM', 3, 'USCITA', 50, 550, 130, 1),
+('AL', 2, 'INGRESSO', 'BA', 3, 'USCITA', 60, 700, 130, 1),
+
+-- BA (solo ingresso = 1)
+('BA', 1, 'INGRESSO', 'FI', 3, 'USCITA', 55, 650, 130, 1),
+('BA', 1, 'INGRESSO', 'TO', 3, 'USCITA', 85, 950, 130, 1),
+('BA', 1, 'INGRESSO', 'AL', 3, 'USCITA', 60, 700, 130, 1);
+
+INSERT INTO tratte
+(cap_in, id_casello_in, dir_in, cap_out, id_casello_out, dir_out,
+ prezzo, chilometri, velocita_massima, stato)
+VALUES
+-- MI ->
+('MI', 1, 'INGRESSO', 'FI', 4, 'USCITA', 30, 300, 130, 1),
+('MI', 1, 'INGRESSO', 'NA', 4, 'USCITA', 80, 800, 130, 1),
+('MI', 1, 'INGRESSO', 'TO', 4, 'USCITA', 20, 150, 130, 1),
+
+-- FI ->
+('FI', 1, 'INGRESSO', 'MI', 4, 'USCITA', 30, 300, 130, 1),
+('FI', 1, 'INGRESSO', 'NA', 4, 'USCITA', 45, 450, 130, 1),
+('FI', 1, 'INGRESSO', 'TO', 4, 'USCITA', 25, 280, 130, 1),
+('FI', 1, 'INGRESSO', 'RM', 4, 'USCITA', 20, 260, 130, 1),
+('FI', 1, 'INGRESSO', 'AL', 4, 'USCITA', 18, 240, 130, 1),
+('FI', 1, 'INGRESSO', 'BA', 4, 'USCITA', 55, 650, 130, 1),
+
+-- NA ->
+('NA', 1, 'INGRESSO', 'MI', 4, 'USCITA', 80, 800, 130, 1),
+('NA', 1, 'INGRESSO', 'FI', 4, 'USCITA', 45, 450, 130, 1),
+('NA', 1, 'INGRESSO', 'TO', 4, 'USCITA', 90, 900, 130, 1),
+('NA', 1, 'INGRESSO', 'AL', 4, 'USCITA', 70, 700, 130, 1),
+('NA', 1, 'INGRESSO', 'BA', 4, 'USCITA', 15, 180, 130, 1),
+
+-- TO (casello ingresso = 2)
+('TO', 2, 'INGRESSO', 'FI', 4, 'USCITA', 25, 280, 130, 1),
+('TO', 2, 'INGRESSO', 'NA', 4, 'USCITA', 90, 900, 130, 1),
+('TO', 2, 'INGRESSO', 'RM', 4, 'USCITA', 60, 650, 130, 1),
+('TO', 2, 'INGRESSO', 'AL', 4, 'USCITA', 10, 120, 130, 1),
+('TO', 2, 'INGRESSO', 'BA', 4, 'USCITA', 85, 950, 130, 1),
+
+-- RM (solo ingresso = 1)
+('RM', 1, 'INGRESSO', 'FI', 4, 'USCITA', 20, 260, 130, 1),
+('RM', 1, 'INGRESSO', 'TO', 4, 'USCITA', 60, 650, 130, 1),
+('RM', 1, 'INGRESSO', 'AL', 4, 'USCITA', 50, 550, 130, 1),
+('RM', 1, 'INGRESSO', 'BA', 4, 'USCITA', 35, 400, 130, 1),
+
+-- AL (casello ingresso = 2)
+('AL', 2, 'INGRESSO', 'FI', 4, 'USCITA', 18, 240, 130, 1),
+('AL', 2, 'INGRESSO', 'NA', 4, 'USCITA', 70, 700, 130, 1),
+('AL', 2, 'INGRESSO', 'RM', 4, 'USCITA', 50, 550, 130, 1),
+('AL', 2, 'INGRESSO', 'BA', 4, 'USCITA', 60, 700, 130, 1),
+
+-- BA (solo ingresso = 1)
+('BA', 1, 'INGRESSO', 'FI', 4, 'USCITA', 55, 650, 130, 1),
+('BA', 1, 'INGRESSO', 'TO', 4, 'USCITA', 85, 950, 130, 1),
+('BA', 1, 'INGRESSO', 'AL', 4, 'USCITA', 60, 700, 130, 1);
+

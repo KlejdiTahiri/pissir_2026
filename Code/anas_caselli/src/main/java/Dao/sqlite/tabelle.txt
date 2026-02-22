@@ -1,0 +1,99 @@
+-- Abilita foreign key in SQLite (da eseguire in ogni sessione)
+PRAGMA foreign_keys = ON;
+
+-- Veicoli
+CREATE TABLE veicoli (
+    targa TEXT PRIMARY KEY,
+    modello TEXT,
+    colore TEXT
+);
+
+-- Caselli con direzione esplicita
+CREATE TABLE caselli (
+    cap TEXT,
+    id_casello INTEGER,
+    direzione TEXT, -- 'ingresso' o 'uscita' (da validare lato app)
+    stato INTEGER DEFAULT 1, -- BOOLEAN: 1 = TRUE, 0 = FALSE
+    PRIMARY KEY (cap, id_casello, direzione)
+);
+
+-- Tratte tra caselli (direzione inclusa)
+CREATE TABLE tratte (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cap_in TEXT,
+    id_casello_in INTEGER,
+    dir_in TEXT,
+    cap_out TEXT,
+    id_casello_out INTEGER,
+    dir_out TEXT,
+    prezzo REAL,
+    chilometri INTEGER,
+    FOREIGN KEY (cap_in, id_casello_in, dir_in) REFERENCES caselli(cap, id_casello, direzione),
+    FOREIGN KEY (cap_out, id_casello_out, dir_out) REFERENCES caselli(cap, id_casello, direzione)
+);
+
+-- Stato attuale dei veicoli in autostrada
+CREATE TABLE autostrada (
+    targa TEXT PRIMARY KEY,
+    cap_ingresso TEXT,
+    id_casello_ingresso INTEGER,
+    direzione_ingresso TEXT,
+    data_ingresso DATETIME DEFAULT (CURRENT_TIMESTAMP),
+    telepass INTEGER, -- BOOLEAN
+    FOREIGN KEY (targa) REFERENCES veicoli(targa),
+    FOREIGN KEY (cap_ingresso, id_casello_ingresso, direzione_ingresso) REFERENCES caselli(cap, id_casello, direzione)
+);
+
+-- Biglietti rilasciati ai veicoli
+CREATE TABLE biglietti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    targa TEXT,
+    cap_ingresso TEXT,
+    id_casello_ingresso INTEGER,
+    direzione_ingresso TEXT,
+    data_ingresso DATETIME DEFAULT (CURRENT_TIMESTAMP),
+    valido INTEGER DEFAULT 1, -- BOOLEAN
+    FOREIGN KEY (targa) REFERENCES veicoli(targa),
+    FOREIGN KEY (cap_ingresso, id_casello_ingresso, direzione_ingresso) REFERENCES caselli(cap, id_casello, direzione)
+);
+
+-- Storico dei passaggi
+CREATE TABLE storico_passaggi (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    targa TEXT,
+    cap_ingresso TEXT,
+    id_casello_ingresso INTEGER,
+    direzione_ingresso TEXT,
+    cap_uscita TEXT,
+    id_casello_uscita INTEGER,
+    direzione_uscita TEXT,
+    data_ingresso DATETIME,
+    data_uscita DATETIME,
+    chilometri INTEGER,
+    velocita_media REAL,
+    telepass INTEGER, -- BOOLEAN
+    prezzo_pagato REAL,
+    metodo_pagamento TEXT,
+    FOREIGN KEY (targa) REFERENCES veicoli(targa),
+    FOREIGN KEY (cap_ingresso, id_casello_ingresso, direzione_ingresso) REFERENCES caselli(cap, id_casello, direzione),
+    FOREIGN KEY (cap_uscita, id_casello_uscita, direzione_uscita) REFERENCES caselli(cap, id_casello, direzione)
+);
+
+-- Pagamenti separati
+CREATE TABLE pagamenti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    targa TEXT,
+    data DATETIME DEFAULT (CURRENT_TIMESTAMP),
+    importo REAL,
+    metodo TEXT, -- contanti / telepass
+    stato_pagamento INTEGER, -- BOOLEAN
+    FOREIGN KEY (targa) REFERENCES veicoli(targa)
+);
+
+-- Utenti del sistema (manager/admin)
+CREATE TABLE utenti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password_hash TEXT,
+    ruolo TEXT -- 'admin' o 'manager' (da validare lato app)
+);

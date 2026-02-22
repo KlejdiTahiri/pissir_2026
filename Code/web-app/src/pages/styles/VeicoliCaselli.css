@@ -1,0 +1,44 @@
+.veicoli-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background-color: #e8f5e9; /* verde chiaro */
+    border: 2px solid #66bb6a; /* verde medio */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 128, 0, 0.1);
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.veicoli-container h2 {
+    color: #2e7d32; /* verde scuro */
+    margin-bottom: 1rem;
+}
+
+.loading,
+.no-data {
+    color: #388e3c;
+    font-weight: bold;
+}
+
+.targhe-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.targa-item {
+    background-color: #a5d6a7;
+    color: #1b5e20;
+    padding: 0.6rem;
+    margin: 0.4rem 0;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.targa-item:hover {
+    background-color: #81c784;
+    transform: scale(1.03);
+    cursor: pointer;
+}
